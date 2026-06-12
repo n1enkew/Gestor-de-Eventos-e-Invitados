@@ -32,7 +32,7 @@
                     </div>
                     <div class="list-group list-group-flush">
                         <a href="eventos.html" class="list-group-item list-group-item-action active">1. Listado de Eventos</a>
-                        <a href="invitados.html" class="list-group-item list-group-item-action">2. Búsqueda de Invitados (Regex)</a>
+                        <a href="invitados.html" class="list-group-item list-group-item-action">2. Búsqueda de Invitados</a>
                         <a href="validacion.html" class="list-group-item list-group-item-action">3. Validación de Accesos</a>
                         <a href="top.html" class="list-group-item list-group-item-action">4. Top 3 Eventos</a>
                     </div>
@@ -44,21 +44,23 @@
                     <div class="card-body">
                         <h5 class="card-title mb-3">1. Listado Total de Eventos</h5>
                         
-                        <table class="table table-striped table-bordered">
-
                             <form method="GET" action="/" class="row g-2 mb-3">
-                                <div class="col-md-4">
+                                <div class="col-sm-9 ">
                                     <select name="categoria" class="form-select">
                                         <option value="">Todas las categorías</option>
                                         <option value="charla">Charlas</option>
                                         <option value="workshop">Workshops</option>
-                                        <option value="seminario">Seminarios</option>
+                                        <option value="meetup">Meetup</option>
                                     </select>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-sm-2">
                                     <button type="submit" class="btn btn-primary w-100">Filtrar</button>
                                 </div>
                             </form>
+
+                        <table class="table table-striped table-bordered">
+
+
                             <thead class="table-light">
                                 <tr>
                                     <th>Código</th>
@@ -73,7 +75,7 @@
                                 <tr>
                                     <td><strong>{{ evento.codigo }}</strong></td>
                                     <td>{{ evento.nombre }}</td>
-                                    <td>{{ evento.fecha.split('T')[0] }}</td>
+                                    <td>{{ evento.fecha.split('T')[0] }}</td> 
                                     <td>{{ evento.lugar }}</td>
                                     <td><span class="badge bg-secondary text-uppercase">{{ evento.categoria }}</span></td>
                                 </tr>

@@ -42,41 +42,68 @@
             <div class="col-md-8 mb-3">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">3. Validación de Accesos</h5>
-                        <p class="card-text text-muted small">Verifica si un invitado está registrado y autorizado para ingresar a un evento específico.</p>
+                        <h5 class="card-title mb-3">3. Validación de Accesos en Puerta</h5>
+                        <p class="card-text text-muted small">Selecciona el evento y escanea/ingresa el RUT del invitado para comprobar su estado de acceso en el registro.</p>
                         
-                        <form class="row g-3 mb-4">
+                        <form method="GET" action="/validacion.html" class="row g-3 mb-4">
+                            
                             <div class="col-md-5">
-                                <label class="form-label small fw-bold">Correo del Invitado</label>
-                                <input type="email" class="form-control" placeholder="ejemplo@correo.cl">
+                                <label class="form-label small fw-bold">RUT del Invitado</label>
+                                <input type="text" name="rut" class="form-control" placeholder="11.009.876-3" required>
                             </div>
                             
                             <div class="col-md-5">
                                 <label class="form-label small fw-bold">Seleccionar Evento</label>
-                                <select class="form-select">
-                                    <option selected>Elige un evento...</option>
-                                    <option value="1">Desarrollo de Apps con Python</option>
-                                    <option value="2">Charla Ciberseguridad INACAP Copiapó</option>
+                                <select name="evento" class="form-select" required>
+                                    <option value="">Elige un evento...</option>
+                                    {% for evento in eventos_dropdown %}
+                                        <option value="{{ evento.codigo }}" {% if request.args.get('evento') == evento.codigo %}selected{% endif %}>
+                                            {{ evento.nombre }}
+                                        </option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             
                             <div class="col-md-2 d-flex align-items-end">
-                                <button type="button" class="btn btn-success w-100">Verificar</button>
+                                <button type="submit" class="btn btn-success w-100">Verificar</button>
                             </div>
                         </form>
 
                         <hr>
 
                         <h6 class="mb-3 text-secondary">Resultado de la consulta:</h6>
-                        
-                        <div class="alert alert-success d-flex align-items-center" role="alert">
-                            <div>
-                                <strong>¡Acceso Permitido! ✅</strong><br>
-                                El invitado <b>David Ogalde</b> se encuentra correctamente registrado para este evento.
-                            </div>
-                        </div>
 
-                        </div>
+                        {% if resultado == 'permitido' %}
+                            <div class="alert alert-success d-flex align-items-center" role="alert">
+                                <div>
+                                    <strong>¡Acceso Permitido! ✅</strong><br>
+                                    El invitado <b>{{ nombre }}</b> se encuentra correctamente en la lista con estado: <span class="badge bg-success text-uppercase">{{ estado }}</span>.
+                                </div>
+                            </div>
+
+                        {% elif resultado == 'bloqueado' %}
+                            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                <div>
+                                    <strong>Acceso Restringido ⚠️</strong><br>
+                                    El invitado <b>{{ nombre }}</b> está en la lista, pero su estado es <span class="badge bg-danger text-uppercase">{{ estado }}</span>. Debe regularizar su situación.
+                                </div>
+                            </div>
+
+                        {% elif resultado == 'no_existe' %}
+                            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                <div>
+                                    <strong>Acceso Denegado ❌</strong><br>
+                                    El RUT <b>{{ rut }}</b> no se encuentra registrado en el listado de invitados para este evento.
+                                </div>
+                            </div>
+                            
+                        {% else %}
+                            <div class="text-muted small text-center py-3">
+                                Esperando lectura de RUT... Ingresa los datos y presiona "Verificar".
+                            </div>
+                        {% endif %}
+
+                    </div>
                 </div>
             </div>
 

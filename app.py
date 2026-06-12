@@ -49,12 +49,70 @@ def mostrar_eventos_listado():
 # 2. Ruta Búsqueda de Invitados
 @app.route('/invitados.html')
 def mostrar_invitados():
-    return render_template('invitados.html')
+    patron_busqueda = request.args.get('busqueda')
+
+    filtro = {}
+
+    if patron_busqueda:
+        patron_busqueda = f".*{patron_busqueda}.*" 
+        filtro = {
+            "$or": [
+                {"nombre": {"$regex": patron_busqueda, "$options": "i"}},
+                {"apellido": {"$regex": patron_busqueda, "$options": "i"}},
+                {"correo": {"$regex": patron_busqueda, "$options": "i"}},
+                {"estado": {"$regex": patron_busqueda, "$options": "i"}},
+                {"rut": {"$regex": patron_busqueda, "$options": "i"}}
+            ]
+        }
+
+    invitados_db = list(coleccion_invitados.find(filtro))
+    return render_template('invitados.html', lista_invitados=invitados_db)
 
 # 3. Ruta Validación de Accesos
 @app.route('/validacion.html')
 def mostrar_validacion():
-    return render_template('validacion.html')
+    eventos_dropdown = list(coleccion_eventos.find({}, {"codigo": 1, "nombre": 1, "_id": 0}))
+
+
+    rut_ingresado = request.args.get('rut')
+    codigo_evento = request.args.get('evento')
+
+    resultado_validacion = None
+    estado_actual = None
+    nombre_invitado = None
+
+    if rut_ingresado and codigo_evento:
+        
+        evento_db = coleccion_eventos.find_one({
+            "codigo": codigo_evento,
+            "invitados.rut": rut_ingresado
+        })
+
+        if evento_db:
+            for inv in evento_db.get("invitados", []):
+                if inv["rut"] == rut_ingresado:
+                    estado_actual = inv["estado"]
+                    break
+
+            persona = coleccion_invitados.find_one({"rut": rut_ingresado})
+            nombre_invitado = persona["nombre"] if persona else rut_ingresado
+            
+            # 4. Lógica de validación según el estado
+            if estado_actual == "confirmado":
+                resultado_validacion = "permitido"
+            else:
+                # Puede estar 'pendiente', 'rechazado', etc.
+                resultado_validacion = "bloqueado"
+        else:
+            # Si el RUT no está en el arreglo de invitados de ese evento
+            resultado_validacion = "no_existe"
+
+    return render_template('validacion.html', 
+                           eventos_dropdown=eventos_dropdown, 
+                           resultado=resultado_validacion, 
+                           rut=rut_ingresado,
+                           nombre=nombre_invitado,
+                           estado=estado_actual)
 
 # 4. Ruta Top 3
 @app.route('/top.html')
