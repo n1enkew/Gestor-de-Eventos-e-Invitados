@@ -117,7 +117,41 @@ def mostrar_validacion():
 # 4. Ruta Top 3
 @app.route('/top.html')
 def mostrar_top():
-    return render_template('top.html')
+
+    pipeline = [
+
+        {"$unwind": "$invitados"},
+        
+
+        {"$match": {"invitados.estado": "confirmado"}},
+        
+
+        {"$lookup": {
+            "from": "invitados",             # Colección con la que queremos cruzar
+            "localField": "invitados.rut",   # El campo RUT en nuestro arreglo actual
+            "foreignField": "rut",           # El campo RUT en la colección 'invitados'
+            "as": "datos_completos"          # Nombre del nuevo arreglo donde guardará el cruce
+        }},
+        
+
+        {"$group": {
+            "_id": "$codigo", 
+            "nombre_evento": {"$first": "$nombre"}, # Mantenemos el nombre del evento
+            "lugar": {"$first": "$lugar"},          # Mantenemos el lugar
+            "total_confirmados": {"$sum": 1}        # Sumamos 1 por cada invitado confirmado que pasó el filtro
+        }},
+        
+
+        {"$sort": {"total_confirmados": -1}},
+        
+
+        {"$limit": 3}
+    ]
+
+
+    top_eventos_db = list(coleccion_eventos.aggregate(pipeline))
+    
+    return render_template('top.html', top_eventos=top_eventos_db)
 
 # Iniciar el servidor
 if __name__ == '__main__':

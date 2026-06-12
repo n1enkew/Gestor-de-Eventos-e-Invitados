@@ -10,7 +10,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Sistema de Eventos (TI3032)</a>
+            <a class="navbar-brand" href="#">Sistema de Eventos </a>
         </div>
     </nav>
 
@@ -43,41 +43,52 @@
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title mb-3">4. Top 3 Eventos Más Populares</h5>
-                        <p class="card-text text-muted small">Ranking de los eventos con mayor cantidad de invitados registrados en el sistema.</p>
+                        <p class="card-text text-muted small">Ranking de los eventos con mayor cantidad de invitados confirmados, calculado dinámicamente cruzando colecciones con <code>$lookup</code>.</p>
                         
-                        <table class="table table-hover table-bordered text-center align-middle">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Posición</th>
-                                    <th>Nombre del Evento</th>
-                                    <th>Lugar</th>
-                                    <th>Total Invitados</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="table-warning">
-                                    <td><h4 class="mb-0">🥇 1</h4></td>
-                                    <td class="text-start fw-bold">Feria Tecnológica Escolar</td>
-                                    <td>Gimnasio Municipal</td>
-                                    <td><span class="badge bg-primary rounded-pill fs-6">150</span></td>
-                                </tr>
-                                <tr class="table-light">
-                                    <td><h5 class="mb-0">🥈 2</h5></td>
-                                    <td class="text-start">Taller Avanzado MongoDB</td>
-                                    <td>Laboratorio 3</td>
-                                    <td><span class="badge bg-secondary rounded-pill fs-6">85</span></td>
-                                </tr>
-                                <tr class="table-light">
-                                    <td><h6 class="mb-0">🥉 3</h6></td>
-                                    <td class="text-start">Conferencia Ciberseguridad</td>
-                                    <td>Auditorio Central</td>
-                                    <td><span class="badge bg-secondary rounded-pill fs-6">42</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered text-center align-middle mt-4">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Posición</th>
+                                        <th>Nombre del Evento</th>
+                                        <th>Lugar</th>
+                                        <th>Total Confirmados</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for evento in top_eventos %}
+                                    
+                                    <tr class="{% if loop.index == 1 %}table-warning{% else %}table-light{% endif %}">
+                                        <td>
+                                            <h4 class="mb-0">
+                                                {% if loop.index == 1 %} 🥇 1
+                                                {% elif loop.index == 2 %} 🥈 2
+                                                {% elif loop.index == 3 %} 🥉 3
+                                                {% endif %}
+                                            </h4>
+                                        </td>
+                                        <td class="text-start fw-bold">{{ evento.nombre_evento }}</td>
+                                        <td>{{ evento.lugar }}</td>
+                                        <td>
+                                            <span class="badge bg-primary rounded-pill fs-6 px-3">
+                                                {{ evento.total_confirmados }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            No hay suficientes datos procesados para generar el Top 3.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
 
-                        <div class="alert alert-info mt-3 py-2" role="alert">
-                            <small>💡 <strong>Nota:</strong> Estos datos se calculan dinámicamente sumando los registros de la base de datos.</small>
+                        <div class="alert alert-info mt-3 py-2 border-0 bg-light" role="alert">
+                            <small>💡 <strong>Nota técnica:</strong> Este ranking excluye a los invitados "pendientes" o "rechazados" usando la etapa <code>$match</code> antes de agrupar.</small>
                         </div>
 
                     </div>
